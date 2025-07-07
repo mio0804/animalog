@@ -11,6 +11,7 @@ services:
       - "5000:5000"
     depends_on:
       - db      # db が先に起動して、次に web が起動される
+    command: sleep infinity  # devcontainer用に永続化
 
   db:
     image: postgres:15  # postgres:latest は最新版を使用できるが、ビルドする度にバージョンが変わる可能性があり環境差異が出るので、固定がベスト
