@@ -9,6 +9,9 @@
   },
   "shutdownAction": "stopCompose",
   "forwardPorts": [5000, 5432],
+  "remoteEnv": {
+    "SHELL": "/bin/bash"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -24,7 +27,8 @@
           "editor.codeActionsOnSave": {
             "source.organizeImports": true
           }
-        }
+        },
+        "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
   },
