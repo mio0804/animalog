@@ -20,6 +20,9 @@ EXPOSE 5000
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 && apt-get install -y nodejs
 
+# claude をインストール
+RUN npm install -g @anthropic-ai/claude-code
+
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
