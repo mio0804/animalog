@@ -16,12 +16,15 @@ COPY . .
 # ポート解放（Flask用）
 EXPOSE 5000
 
-# Create non-root user
-ARG USERNAME=codespace
+# Node.js（18系）と npm をインストール
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+&& apt-get install -y nodejs
+
+ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-# Create the user if it doesn't exist
+# vscode ユーザを作成する
 RUN if ! id -u ${USERNAME} > /dev/null 2>&1; then \
     groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
@@ -30,9 +33,10 @@ RUN if ! id -u ${USERNAME} > /dev/null 2>&1; then \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME; \
     fi
-# Set up workspace directory
+# workspace ディレクトリの設定
 RUN mkdir -p /workspace && chown -R $USERNAME:$USERNAME /workspace
 
+# vscode ユーザに切り替える
 USER $USERNAME
 
 ## 開発中のため CMD は使わず、VSCode から起動する
