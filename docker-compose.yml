@@ -9,6 +9,7 @@ services:
       - .:/workspace  # ルートディレクトリを /workspace がマウント * 双方の修正が反映されるように
     ports:
       - "5000:5000"
+      - "3000:3000"  # React 開発サーバー
     depends_on:
       - db      # db が先に起動して、次に web が起動される
     command: sleep infinity  # devcontainer用に永続化
@@ -18,9 +19,9 @@ services:
     ports:
       - "5432:5432"
     environment:  # 環境変数 (エンバイロメント)
-      POSTGRES_DB: catdialy           # 新規データベースを作成
-      POSTGRES_USER: catdialy       # 新規ユーザーを作成
-      POSTGRES_PASSWORD: catdialy   # ユーザーのパスワードを設定
+      POSTGRES_DB: animalog           # 新規データベースを作成
+      POSTGRES_USER: animalog       # 新規ユーザーを作成
+      POSTGRES_PASSWORD: animalog   # ユーザーのパスワードを設定
     volumes:
       - pg_data:/var/lib/postgresql/data  # pg_data を /var/lib/postgresql/data がマウント
 

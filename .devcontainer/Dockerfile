@@ -13,11 +13,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # アプリのコードをコピー（VSCodeからはマウントされるが、buildでも必要）
 COPY . .
 
-# ポート解放（Flask用）
+# 使用ポートの宣言（Flask用とReact用）
 EXPOSE 5000
+EXPOSE 3000
 
-# Node.js（18系）と npm をインストール
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+# Node.js（20系）と npm をインストール
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 && apt-get install -y nodejs
 
 # claude をインストール
