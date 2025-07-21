@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, current_app
+from werkzeug.utils import secure_filename
 from auth import login_required
 from models import db, Diary, Pet
 from utils.s3 import save_file_locally, generate_presigned_url, delete_file, allowed_file
@@ -99,9 +100,39 @@ def create_diary():
             return jsonify({'error': 'Invalid file type'}), 400
         
         if current_app.config['USE_S3']:
-            # For S3, we would typically use presigned URL flow
-            # but for direct upload, save temporarily and upload
-            pass
+            # For S3, generate presigned URL and upload directly
+            try:
+                import boto3
+                from utils.s3 import generate_unique_filename
+                
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=current_app.config['AWS_ACCESS_KEY_ID'],
+                    aws_secret_access_key=current_app.config['AWS_SECRET_ACCESS_KEY'],
+                    region_name=current_app.config['AWS_REGION']
+                )
+                
+                # Generate unique filename
+                filename = generate_unique_filename(secure_filename(image_file.filename))
+                key = f"diary-images/{filename}"
+                
+                # Upload file to S3 with public read access
+                s3_client.upload_fileobj(
+                    image_file,
+                    current_app.config['S3_BUCKET_NAME'],
+                    key,
+                    ExtraArgs={
+                        'ContentType': image_file.content_type,
+                        'ACL': 'public-read'
+                    }
+                )
+                
+                # Generate public URL
+                image_url = f"https://{current_app.config['S3_BUCKET_NAME']}.s3.{current_app.config['AWS_REGION']}.amazonaws.com/{key}"
+                
+            except Exception as e:
+                current_app.logger.error(f"Failed to upload to S3: {e}")
+                return jsonify({'error': 'Failed to upload image'}), 500
         else:
             image_url = save_file_locally(image_file)
     elif data.get('image_url'):

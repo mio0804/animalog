@@ -54,7 +54,8 @@ def generate_presigned_url(filename, file_type):
         Params={
             'Bucket': current_app.config['S3_BUCKET_NAME'],
             'Key': key,
-            'ContentType': file_type
+            'ContentType': file_type,
+            'ACL': 'public-read'
         },
         ExpiresIn=3600  # 1 hour
     )

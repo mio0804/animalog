@@ -68,12 +68,27 @@ class Diary(db.Model):
     updated_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
     
     def to_dict(self):
+        from flask import current_app
+        
+        # Convert local image URLs to proxy URLs if USE_S3 is enabled
+        image_url = self.image_url
+        if image_url and current_app.config.get('USE_S3', False):
+            if image_url.startswith('/uploads/'):
+                # Extract filename from local path and use proxy endpoint
+                filename = image_url.replace('/uploads/', '')
+                image_url = f"/api/images/proxy/{filename}"
+            elif 's3.amazonaws.com' in image_url or 's3.ap-northeast-1.amazonaws.com' in image_url:
+                # Extract filename from S3 URL and use proxy endpoint
+                parts = image_url.split('/')
+                filename = parts[-1]
+                image_url = f"/api/images/proxy/{filename}"
+        
         return {
             'id': str(self.id),
             'pet_id': str(self.pet_id),
             'pet_name': self.pet.name,
             'title': self.title,
             'content': self.content,
-            'image_url': self.image_url,
+            'image_url': image_url,
             'created_at': self.created_at.isoformat()
         }
