@@ -15,7 +15,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     updated_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
+    # リレーションシップ
     pets = db.relationship('Pet', backref='owner', lazy='dynamic', cascade='all, delete-orphan')
     diaries = db.relationship('Diary', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     
@@ -40,7 +40,7 @@ class Pet(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     updated_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
+    # リレーションシップ
     diaries = db.relationship('Diary', backref='pet', lazy='dynamic', cascade='all, delete-orphan')
     
     def to_dict(self):
@@ -70,15 +70,15 @@ class Diary(db.Model):
     def to_dict(self):
         from flask import current_app
         
-        # Convert local image URLs to proxy URLs if USE_S3 is enabled
+        # USE_S3が有効な場合、ローカル画像URLをプロキシURLに変換
         image_url = self.image_url
         if image_url and current_app.config.get('USE_S3', False):
             if image_url.startswith('/uploads/'):
-                # Extract filename from local path and use proxy endpoint
+                # ローカルパスからファイル名を抽出し、プロキシエンドポイントを使用
                 filename = image_url.replace('/uploads/', '')
                 image_url = f"/api/images/proxy/{filename}"
             elif 's3.amazonaws.com' in image_url or 's3.ap-northeast-1.amazonaws.com' in image_url:
-                # Extract filename from S3 URL and use proxy endpoint
+                # S3 URLからファイル名を抽出し、プロキシエンドポイントを使用
                 parts = image_url.split('/')
                 filename = parts[-1]
                 image_url = f"/api/images/proxy/{filename}"

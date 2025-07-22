@@ -10,17 +10,17 @@ def get_presigned_url(image_url):
     if not image_url or not current_app.config['USE_S3']:
         return image_url
     
-    # Check if it's an S3 URL
+    # S3 URLかどうかをチェック
     bucket_name = current_app.config['S3_BUCKET_NAME']
     s3_prefix = f"https://{bucket_name}.s3.{current_app.config['AWS_REGION']}.amazonaws.com/"
     
     if not image_url.startswith(s3_prefix):
         return image_url
     
-    # Extract key from URL
+    # URLからキーを抽出
     key = image_url.replace(s3_prefix, '')
     
-    # Generate presigned URL
+    # プリサインドURLを生成
     s3_client = boto3.client(
         's3',
         aws_access_key_id=current_app.config['AWS_ACCESS_KEY_ID'],

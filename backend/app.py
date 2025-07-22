@@ -12,34 +12,34 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
-    # Initialize extensions
+    # 拡張機能を初期化
     db.init_app(app)
     CORS(app, origins=app.config['CORS_ORIGINS'], supports_credentials=True)
     
-    # Register blueprints
+    # ブループリントを登録
     app.register_blueprint(auth_bp)
     app.register_blueprint(pets_bp)
     app.register_blueprint(diaries_bp)
     app.register_blueprint(images_bp)
     
-    # Serve uploaded files in development
+    # 開発環境でのアップロードファイルの配信
     @app.route('/uploads/<filename>')
     def uploaded_file(filename):
         if app.config['USE_S3']:
-            # Redirect to S3 URL when USE_S3 is true
+            # USE_S3がtrueの場合、S3 URLにリダイレクト
             s3_url = f"https://{app.config['S3_BUCKET_NAME']}.s3.{app.config['AWS_REGION']}.amazonaws.com/diary-images/{filename}"
             from flask import redirect
             return redirect(s3_url)
         else:
-            # Serve from local folder when USE_S3 is false
+            # USE_S3がfalseの場合、ローカルフォルダから配信
             return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     
-    # Health check endpoint
+    # ヘルスチェックエンドポイント
     @app.route('/api/health')
     def health_check():
         return {'status': 'healthy'}
     
-    # Create tables if they don't exist
+    # テーブルが存在しない場合は作成
     with app.app_context():
         db.create_all()
     

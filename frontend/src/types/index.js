@@ -1,5 +1,5 @@
 // TypeScript型定義をJavaScriptで定義
-// User type definition
+// ユーザー型定義
 export const UserType = {
   id: '',
   email: '',
@@ -7,7 +7,7 @@ export const UserType = {
   created_at: ''
 };
 
-// Pet type definition  
+// ペット型定義
 export const PetType = {
   id: '',
   name: '',
@@ -19,7 +19,7 @@ export const PetType = {
   diary_count: 0
 };
 
-// Diary type definition
+// 日記型定義
 export const DiaryType = {
   id: '',
   pet_id: '',

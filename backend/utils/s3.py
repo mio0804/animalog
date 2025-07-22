@@ -28,11 +28,11 @@ def save_file_locally(file):
     filename = generate_unique_filename(secure_filename(file.filename))
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     
-    # Ensure upload directory exists
+    # アップロードディレクトリが存在することを確認
     os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
     
     file.save(filepath)
-    # Return relative URL for local files
+    # ローカルファイルの相対的URLを返す
     return f"/uploads/{filename}"
 
 def generate_presigned_url(filename, file_type):
@@ -60,7 +60,7 @@ def generate_presigned_url(filename, file_type):
         ExpiresIn=3600  # 1 hour
     )
     
-    # Return both the presigned URL and the final file URL
+    # プリサインドURLと最終ファイルURLの両方を返す
     file_url = f"https://{current_app.config['S3_BUCKET_NAME']}.s3.{current_app.config['AWS_REGION']}.amazonaws.com/{key}"
     
     return {
@@ -74,7 +74,7 @@ def delete_file(file_url):
         return
     
     if current_app.config['USE_S3']:
-        # Extract key from S3 URL
+        # S3 URLからキーを抽出
         bucket_name = current_app.config['S3_BUCKET_NAME']
         if bucket_name in file_url:
             key = file_url.split(f"{bucket_name}/")[-1]
@@ -91,7 +91,7 @@ def delete_file(file_url):
             except Exception as e:
                 current_app.logger.error(f"Failed to delete S3 object: {e}")
     else:
-        # Delete local file
+        # ローカルファイルを削除
         if file_url.startswith('/uploads/'):
             filename = file_url.replace('/uploads/', '')
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)

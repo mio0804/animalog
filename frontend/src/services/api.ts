@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// Add auth token to requests if available
+// リクエストに認証トークンがある場合は追加
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -18,7 +18,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auth API
+// 認証API
 export const authAPI = {
   login: async () => {
     const response = await api.post('/auth/login');
@@ -30,7 +30,7 @@ export const authAPI = {
   },
 };
 
-// Pets API
+// ペットAPI
 export const petsAPI = {
   getAll: async () => {
     const response = await api.get('/pets');
@@ -54,7 +54,7 @@ export const petsAPI = {
   },
 };
 
-// Diaries API
+// 日記API
 export const diariesAPI = {
   getAllByPet: async (petId: string, page = 1) => {
     const response = await api.get(`/pets/${petId}/diaries?page=${page}`);

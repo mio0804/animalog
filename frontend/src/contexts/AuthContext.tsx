@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      // 開発環境ではトークンがなくてもユーザー情報を取得を試みる
+      // 開発環境ではトークンがなくてもユーザー情報の取得を試みる
       const response = await authAPI.getMe();
       setUser(response.user);
     } catch (error) {

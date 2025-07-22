@@ -1,11 +1,11 @@
-// User type definition
+// ユーザー型定義
 export interface User {
   id: string;
   email: string;
   created_at: string;
 }
 
-// Pet type definition
+// ペット型定義
 export interface Pet {
   id: string;
   name: string;
@@ -17,7 +17,7 @@ export interface Pet {
   diary_count?: number;
 }
 
-// Diary type definition
+// 日記型定義
 export interface Diary {
   id: string;
   pet_id: string;
@@ -28,7 +28,7 @@ export interface Diary {
   created_at: string;
 }
 
-// Paginated response type definition
+// ページネーションレスポンス型定義
 export interface PaginatedResponse<T> {
   [key: string]: T[];
   total: number;

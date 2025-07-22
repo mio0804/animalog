@@ -12,7 +12,7 @@ def update_s3_acl():
         print("USE_S3 is not enabled. Please set USE_S3=true in .env file")
         return
     
-    # Initialize S3 client
+    # S3クライアントを初期化
     s3_client = boto3.client(
         's3',
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
@@ -20,7 +20,7 @@ def update_s3_acl():
         region_name=config.AWS_REGION
     )
     
-    # List all objects in the diary-images prefix
+    # diary-imagesプレフィックス内のすべてのオブジェクトをリスト
     try:
         response = s3_client.list_objects_v2(
             Bucket=config.S3_BUCKET_NAME,
@@ -34,7 +34,7 @@ def update_s3_acl():
         objects = response['Contents']
         print(f"Found {len(objects)} objects to update")
         
-        # Update ACL for each object
+        # 各オブジェクトのACLを更新
         for obj in objects:
             key = obj['Key']
             try:

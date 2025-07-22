@@ -15,7 +15,7 @@ def migrate_images_to_s3():
         print("USE_S3 is not enabled. Please set USE_S3=true in .env file")
         return
     
-    # Initialize S3 client
+    # S3クライアントを初期化
     s3_client = boto3.client(
         's3',
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
@@ -23,7 +23,7 @@ def migrate_images_to_s3():
         region_name=config.AWS_REGION
     )
     
-    # Get all image files from uploads folder
+    # アップロードフォルダからすべての画像ファイルを取得
     upload_folder = config.UPLOAD_FOLDER
     image_patterns = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
     image_files = []
@@ -37,13 +37,13 @@ def migrate_images_to_s3():
     
     print(f"Found {len(image_files)} images to migrate")
     
-    # Upload each image to S3
+    # 各画像をS3にアップロード
     for image_path in image_files:
         filename = os.path.basename(image_path)
         key = f"diary-images/{filename}"
         
         try:
-            # Check if file already exists in S3
+            # ファイルがS3に既に存在するかをチェック
             try:
                 s3_client.head_object(Bucket=config.S3_BUCKET_NAME, Key=key)
                 print(f"✓ {filename} already exists in S3")
@@ -51,7 +51,7 @@ def migrate_images_to_s3():
             except:
                 pass
             
-            # Upload file to S3 with public read access
+            # パブリック読み取りアクセスでファイルをS3にアップロード
             with open(image_path, 'rb') as f:
                 s3_client.upload_fileobj(
                     f,

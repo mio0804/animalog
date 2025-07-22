@@ -16,7 +16,7 @@ def get_me():
 def login():
     """Login endpoint - in development mode, returns mock token"""
     if not current_app.config['USE_COGNITO']:
-        # Development mode - return mock token
+        # 開発モード - モックトークンを返す
         return jsonify({
             'token': 'mock-development-token',
             'user': {
@@ -25,7 +25,7 @@ def login():
             }
         })
     
-    # Production mode - validate Cognito token
+    # 本番モード - Cognitoトークンを検証
     data = request.get_json()
     token = data.get('token')
     

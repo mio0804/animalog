@@ -32,11 +32,11 @@ def create_pet():
     """Create a new pet"""
     data = request.get_json()
     
-    # Validate required fields
+    # 必須フィールドを検証
     if not data.get('name'):
         return jsonify({'error': 'Name is required'}), 400
     
-    # Parse birth date if provided
+    # 生年月日が提供されている場合は解析
     birth_date = None
     if data.get('birth_date'):
         try:
@@ -44,7 +44,7 @@ def create_pet():
         except ValueError:
             return jsonify({'error': 'Invalid birth date format'}), 400
     
-    # Create new pet
+    # 新しいペットを作成
     pet = Pet(
         user_id=request.current_user.id,
         name=data['name'],
@@ -73,7 +73,7 @@ def update_pet(pet_id):
     
     data = request.get_json()
     
-    # Update fields if provided
+    # 提供されたフィールドを更新
     if 'name' in data:
         pet.name = data['name']
     if 'species' in data:
@@ -107,7 +107,7 @@ def delete_pet(pet_id):
     if not pet:
         return jsonify({'error': 'Pet not found'}), 404
     
-    # Delete pet (diaries will be cascade deleted)
+    # ペットを削除（日記はカスケード削除）
     db.session.delete(pet)
     db.session.commit()
     

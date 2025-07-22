@@ -9,8 +9,8 @@ diaries_bp = Blueprint('diaries', __name__)
 @diaries_bp.route('/api/pets/<pet_id>/diaries', methods=['GET'])
 @login_required
 def get_diaries(pet_id):
-    """Get all diaries for a specific pet"""
-    # Verify pet ownership
+    """特定のペットのすべての日記を取得"""
+    # ペットの所有権を検証
     pet = Pet.query.filter_by(
         id=pet_id,
         user_id=request.current_user.id
@@ -19,11 +19,11 @@ def get_diaries(pet_id):
     if not pet:
         return jsonify({'error': 'Pet not found'}), 404
     
-    # Get pagination parameters
+    # ページネーションパラメータを取得
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
-    # Query diaries
+    # 日記をクエリ
     diaries_query = Diary.query.filter_by(pet_id=pet_id).order_by(Diary.created_at.desc())
     pagination = diaries_query.paginate(page=page, per_page=per_page, error_out=False)
     
@@ -72,7 +72,7 @@ def get_diary(diary_id):
 @login_required
 def create_diary():
     """Create a new diary entry"""
-    # Handle both JSON and multipart/form-data
+    # JSONとmultipart/form-dataの両方を処理
     if request.is_json:
         data = request.get_json()
         image_file = None
@@ -80,11 +80,11 @@ def create_diary():
         data = request.form.to_dict()
         image_file = request.files.get('image')
     
-    # Validate required fields
+    # 必須フィールドを検証
     if not data.get('pet_id') or not data.get('content'):
         return jsonify({'error': 'Pet ID and content are required'}), 400
     
-    # Verify pet ownership
+    # ペットの所有権を検証
     pet = Pet.query.filter_by(
         id=data['pet_id'],
         user_id=request.current_user.id
@@ -93,14 +93,14 @@ def create_diary():
     if not pet:
         return jsonify({'error': 'Pet not found'}), 404
     
-    # Handle image upload if provided
+    # 画像が提供された場合のアップロード処理
     image_url = None
     if image_file and image_file.filename != '':
         if not allowed_file(image_file.filename):
             return jsonify({'error': 'Invalid file type'}), 400
         
         if current_app.config['USE_S3']:
-            # For S3, generate presigned URL and upload directly
+            # S3の場合、プリサインドURLを生成して直接アップロード
             try:
                 import boto3
                 from utils.s3 import generate_unique_filename
@@ -112,11 +112,11 @@ def create_diary():
                     region_name=current_app.config['AWS_REGION']
                 )
                 
-                # Generate unique filename
+                # 一意なファイル名を生成
                 filename = generate_unique_filename(secure_filename(image_file.filename))
                 key = f"diary-images/{filename}"
                 
-                # Upload file to S3 with public read access
+                # パブリック読み取りアクセスでS3にファイルをアップロード
                 s3_client.upload_fileobj(
                     image_file,
                     current_app.config['S3_BUCKET_NAME'],
@@ -127,7 +127,7 @@ def create_diary():
                     }
                 )
                 
-                # Generate public URL
+                # パブリックURLを生成
                 image_url = f"https://{current_app.config['S3_BUCKET_NAME']}.s3.{current_app.config['AWS_REGION']}.amazonaws.com/{key}"
                 
             except Exception as e:
@@ -136,10 +136,10 @@ def create_diary():
         else:
             image_url = save_file_locally(image_file)
     elif data.get('image_url'):
-        # Image was already uploaded via presigned URL
+        # 画像はすでにプリサインドURL経由でアップロード済み
         image_url = data['image_url']
     
-    # Create diary entry
+    # 日記エントリを作成
     diary = Diary(
         pet_id=pet.id,
         user_id=request.current_user.id,
@@ -167,7 +167,7 @@ def update_diary(diary_id):
     
     data = request.get_json()
     
-    # Update fields if provided
+    # 提供されたフィールドを更新
     if 'title' in data:
         diary.title = data['title']
     if 'content' in data:
@@ -189,7 +189,7 @@ def delete_diary(diary_id):
     if not diary:
         return jsonify({'error': 'Diary not found'}), 404
     
-    # Delete associated image if exists
+    # 関連する画像がある場合は削除
     if diary.image_url:
         delete_file(diary.image_url)
     

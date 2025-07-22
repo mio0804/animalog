@@ -113,13 +113,13 @@ const DiaryForm: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (16MB limit)
+      // ファイルサイズをチェック（16MB制限）
       if (file.size > 16 * 1024 * 1024) {
         setError('ファイルサイズは16MB以下にしてください');
         return;
       }
 
-      // Check file type
+      // ファイルタイプをチェック
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
         setError('JPEG、PNG、GIF、WebP形式の画像のみアップロード可能です');
@@ -128,7 +128,7 @@ const DiaryForm: React.FC = () => {
 
       setSelectedFile(file);
       
-      // Create preview
+      // プレビューを作成
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string);
@@ -141,7 +141,7 @@ const DiaryForm: React.FC = () => {
     setSelectedFile(null);
     setImagePreview('');
     setExistingImageUrl('');
-    // Reset file input
+    // ファイル入力をリセット
     const fileInput = document.getElementById('image') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
   };

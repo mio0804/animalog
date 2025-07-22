@@ -18,17 +18,17 @@ def proxy_image(image_path):
     )
     
     try:
-        # Get object from S3
+        # S3からオブジェクトを取得
         response = s3_client.get_object(
             Bucket=current_app.config['S3_BUCKET_NAME'],
             Key=f'diary-images/{image_path}'
         )
         
-        # Read the image data
+        # 画像データを読み取り
         image_data = response['Body'].read()
         content_type = response.get('ContentType', 'image/jpeg')
         
-        # Return the image
+        # 画像を返す
         from flask import Response
         return Response(image_data, mimetype=content_type)
         

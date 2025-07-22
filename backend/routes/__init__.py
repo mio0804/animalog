@@ -1,1 +1,1 @@
-# Routes package
+# ルートパッケージ

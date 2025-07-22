@@ -8,7 +8,7 @@ from models import User, db
 def get_current_user():
     """Get current user from token or mock user in development"""
     if not current_app.config['USE_COGNITO']:
-        # Development mode - use mock user
+        # 開発モード - モックユーザーを使用
         mock_sub = current_app.config['MOCK_USER_ID']
         user = User.query.filter_by(cognito_sub=mock_sub).first()
         if not user:
@@ -21,7 +21,7 @@ def get_current_user():
             db.session.commit()
         return user
     
-    # Production mode - validate Cognito token
+    # 本番モード - Cognitoトークンを検証
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
         return None
@@ -31,7 +31,7 @@ def get_current_user():
     if not user_info:
         return None
     
-    # Find or create user
+    # ユーザーを検索または作成
     user = User.query.filter_by(cognito_sub=user_info['sub']).first()
     if not user:
         user = User(
@@ -58,7 +58,7 @@ def login_required(f):
 def verify_cognito_token(token):
     """Verify Cognito JWT token"""
     try:
-        # Get Cognito public keys
+        # Cognito公開鍵を取得
         region = current_app.config['COGNITO_REGION']
         user_pool_id = current_app.config['COGNITO_USER_POOL_ID']
         keys_url = f'https://cognito-idp.{region}.amazonaws.com/{user_pool_id}/.well-known/jwks.json'
@@ -66,16 +66,16 @@ def verify_cognito_token(token):
         response = requests.get(keys_url)
         keys = response.json()['keys']
         
-        # Decode token header to get kid
+        # トークンヘッダをデコードしてkidを取得
         headers = jwt.get_unverified_headers(token)
         kid = headers['kid']
         
-        # Find the correct key
+        # 正しいキーを検索
         key = next((k for k in keys if k['kid'] == kid), None)
         if not key:
             return None
         
-        # Verify and decode token
+        # トークンを検証してデコード
         payload = jwt.decode(
             token,
             key,
@@ -83,7 +83,7 @@ def verify_cognito_token(token):
             audience=current_app.config['COGNITO_APP_CLIENT_ID']
         )
         
-        # Verify token expiration
+        # トークンの有効期限を検証
         if datetime.fromtimestamp(payload['exp']) < datetime.utcnow():
             return None
         
