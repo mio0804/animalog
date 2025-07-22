@@ -69,19 +69,12 @@ class Diary(db.Model):
     
     def to_dict(self):
         from flask import current_app
+        from utils.s3_url import get_presigned_url
         
-        # USE_S3が有効な場合、ローカル画像URLをプロキシURLに変換
+        # USE_S3が有効な場合、画像URLを署名付きURLに変換
         image_url = self.image_url
         if image_url and current_app.config.get('USE_S3', False):
-            if image_url.startswith('/uploads/'):
-                # ローカルパスからファイル名を抽出し、プロキシエンドポイントを使用
-                filename = image_url.replace('/uploads/', '')
-                image_url = f"/api/images/proxy/{filename}"
-            elif 's3.amazonaws.com' in image_url or 's3.ap-northeast-1.amazonaws.com' in image_url:
-                # S3 URLからファイル名を抽出し、プロキシエンドポイントを使用
-                parts = image_url.split('/')
-                filename = parts[-1]
-                image_url = f"/api/images/proxy/{filename}"
+            image_url = get_presigned_url(image_url)
         
         return {
             'id': str(self.id),

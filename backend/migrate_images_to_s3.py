@@ -58,8 +58,7 @@ def migrate_images_to_s3():
                     config.S3_BUCKET_NAME,
                     key,
                     ExtraArgs={
-                        'ContentType': f'image/{os.path.splitext(filename)[1][1:]}',
-                        'ACL': 'public-read'
+                        'ContentType': f'image/{os.path.splitext(filename)[1][1:]}'
                     }
                 )
             print(f"✓ Uploaded {filename} to S3")

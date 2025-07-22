@@ -5,7 +5,6 @@ from models import db
 from routes.auth import auth_bp
 from routes.pets import pets_bp
 from routes.diaries import diaries_bp
-from routes.images import images_bp
 import os
 
 def create_app():
@@ -20,7 +19,6 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(pets_bp)
     app.register_blueprint(diaries_bp)
-    app.register_blueprint(images_bp)
     
     # 開発環境でのアップロードファイルの配信
     @app.route('/uploads/<filename>')

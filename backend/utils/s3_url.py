@@ -10,15 +10,19 @@ def get_presigned_url(image_url):
     if not image_url or not current_app.config['USE_S3']:
         return image_url
     
-    # S3 URLかどうかをチェック
     bucket_name = current_app.config['S3_BUCKET_NAME']
     s3_prefix = f"https://{bucket_name}.s3.{current_app.config['AWS_REGION']}.amazonaws.com/"
     
-    if not image_url.startswith(s3_prefix):
+    # ローカルパスの場合はS3キーに変換
+    if image_url.startswith('/uploads/'):
+        filename = image_url.replace('/uploads/', '')
+        key = f"diary-images/{filename}"
+    elif image_url.startswith(s3_prefix):
+        # S3 URLの場合はキーを抽出
+        key = image_url.replace(s3_prefix, '')
+    else:
+        # その他の形式はそのまま返す
         return image_url
-    
-    # URLからキーを抽出
-    key = image_url.replace(s3_prefix, '')
     
     # プリサインドURLを生成
     s3_client = boto3.client(

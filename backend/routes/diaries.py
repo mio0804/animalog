@@ -122,8 +122,7 @@ def create_diary():
                     current_app.config['S3_BUCKET_NAME'],
                     key,
                     ExtraArgs={
-                        'ContentType': image_file.content_type,
-                        'ACL': 'public-read'
+                        'ContentType': image_file.content_type
                     }
                 )
                 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Update ACL for existing S3 objects to make them publicly readable
+Update ACL for existing S3 objects to make them private (secure with presigned URLs)
 """
 import boto3
 from config import Config
@@ -41,13 +41,13 @@ def update_s3_acl():
                 s3_client.put_object_acl(
                     Bucket=config.S3_BUCKET_NAME,
                     Key=key,
-                    ACL='public-read'
+                    ACL='private'
                 )
                 print(f"✓ Updated ACL for {key}")
             except Exception as e:
                 print(f"✗ Failed to update ACL for {key}: {e}")
         
-        print("\nACL update complete!")
+        print("\nACL update complete! All objects are now private and accessible via presigned URLs only.")
         
     except Exception as e:
         print(f"Error listing objects: {e}")
