@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 from auth import login_required
 from models import db, Diary, Pet
 from utils.s3 import save_file_locally, generate_presigned_url, delete_file, allowed_file
+from utils.aws_client import create_s3_client_for_flask
 
 diaries_bp = Blueprint('diaries', __name__)
 
@@ -37,7 +38,7 @@ def get_diaries(pet_id):
 @diaries_bp.route('/api/diaries', methods=['GET'])
 @login_required
 def get_all_diaries():
-    """Get all diaries for current user's pets"""
+    """現在のユーザーのペットのすべての日記を取得"""
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
@@ -57,7 +58,7 @@ def get_all_diaries():
 @diaries_bp.route('/api/diaries/<diary_id>', methods=['GET'])
 @login_required
 def get_diary(diary_id):
-    """Get a specific diary entry"""
+    """特定の日記エントリを取得"""
     diary = Diary.query.filter_by(
         id=diary_id,
         user_id=request.current_user.id
@@ -71,7 +72,7 @@ def get_diary(diary_id):
 @diaries_bp.route('/api/diaries', methods=['POST'])
 @login_required
 def create_diary():
-    """Create a new diary entry"""
+    """新しい日記エントリを作成"""
     # JSONとmultipart/form-dataの両方を処理
     if request.is_json:
         data = request.get_json()
@@ -105,12 +106,7 @@ def create_diary():
                 import boto3
                 from utils.s3 import generate_unique_filename
                 
-                s3_client = boto3.client(
-                    's3',
-                    aws_access_key_id=current_app.config['AWS_ACCESS_KEY_ID'],
-                    aws_secret_access_key=current_app.config['AWS_SECRET_ACCESS_KEY'],
-                    region_name=current_app.config['AWS_REGION']
-                )
+                s3_client = create_s3_client_for_flask(current_app)
                 
                 # 一意なファイル名を生成
                 filename = generate_unique_filename(secure_filename(image_file.filename))
@@ -155,7 +151,7 @@ def create_diary():
 @diaries_bp.route('/api/diaries/<diary_id>', methods=['PUT'])
 @login_required
 def update_diary(diary_id):
-    """Update a diary entry"""
+    """日記エントリを更新"""
     diary = Diary.query.filter_by(
         id=diary_id,
         user_id=request.current_user.id
@@ -179,7 +175,7 @@ def update_diary(diary_id):
 @diaries_bp.route('/api/diaries/<diary_id>', methods=['DELETE'])
 @login_required
 def delete_diary(diary_id):
-    """Delete a diary entry"""
+    """日記エントリを削除"""
     diary = Diary.query.filter_by(
         id=diary_id,
         user_id=request.current_user.id
@@ -200,7 +196,7 @@ def delete_diary(diary_id):
 @diaries_bp.route('/api/upload/presigned-url', methods=['POST'])
 @login_required
 def get_presigned_url():
-    """Get presigned URL for S3 upload"""
+    """S3アップロード用の署名付きURLを取得"""
     if not current_app.config['USE_S3']:
         return jsonify({'error': 'S3 uploads not configured'}), 400
     

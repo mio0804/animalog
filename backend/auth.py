@@ -6,7 +6,7 @@ import requests
 from models import User, db
 
 def get_current_user():
-    """Get current user from token or mock user in development"""
+    """トークンから現在のユーザーを取得、または開発環境ではモックユーザーを使用"""
     if not current_app.config['USE_COGNITO']:
         # 開発モード - モックユーザーを使用
         mock_sub = current_app.config['MOCK_USER_ID']
@@ -45,7 +45,7 @@ def get_current_user():
     return user
 
 def login_required(f):
-    """Decorator to require authentication"""
+    """認証を必須とするデコレータ"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         user = get_current_user()
@@ -56,7 +56,7 @@ def login_required(f):
     return decorated_function
 
 def verify_cognito_token(token):
-    """Verify Cognito JWT token"""
+    """Cognito JWTトークンを検証"""
     try:
         # Cognito公開鍵を取得
         region = current_app.config['COGNITO_REGION']

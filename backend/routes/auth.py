@@ -5,7 +5,7 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/api/auth/me', methods=['GET'])
 def get_me():
-    """Get current user information"""
+    """現在のユーザー情報を取得"""
     user = get_current_user()
     if not user:
         return jsonify({'error': 'Not authenticated'}), 401
@@ -14,7 +14,7 @@ def get_me():
 
 @auth_bp.route('/api/auth/login', methods=['POST'])
 def login():
-    """Login endpoint - in development mode, returns mock token"""
+    """ログインエンドポイント - 開発モードではモックトークンを返す"""
     if not current_app.config['USE_COGNITO']:
         # 開発モード - モックトークンを返す
         return jsonify({

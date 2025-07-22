@@ -8,14 +8,14 @@ pets_bp = Blueprint('pets', __name__)
 @pets_bp.route('/api/pets', methods=['GET'])
 @login_required
 def get_pets():
-    """Get all pets for current user"""
+    """現在のユーザーのすべてのペットを取得"""
     pets = request.current_user.pets.order_by(Pet.created_at.desc()).all()
     return jsonify({'pets': [pet.to_dict() for pet in pets]})
 
 @pets_bp.route('/api/pets/<pet_id>', methods=['GET'])
 @login_required
 def get_pet(pet_id):
-    """Get a specific pet"""
+    """特定のペットを取得"""
     pet = Pet.query.filter_by(
         id=pet_id,
         user_id=request.current_user.id
@@ -29,7 +29,7 @@ def get_pet(pet_id):
 @pets_bp.route('/api/pets', methods=['POST'])
 @login_required
 def create_pet():
-    """Create a new pet"""
+    """新しいペットを作成"""
     data = request.get_json()
     
     # 必須フィールドを検証
@@ -62,7 +62,7 @@ def create_pet():
 @pets_bp.route('/api/pets/<pet_id>', methods=['PUT'])
 @login_required
 def update_pet(pet_id):
-    """Update a pet"""
+    """ペットを更新"""
     pet = Pet.query.filter_by(
         id=pet_id,
         user_id=request.current_user.id
@@ -98,7 +98,7 @@ def update_pet(pet_id):
 @pets_bp.route('/api/pets/<pet_id>', methods=['DELETE'])
 @login_required
 def delete_pet(pet_id):
-    """Delete a pet"""
+    """ペットを削除"""
     pet = Pet.query.filter_by(
         id=pet_id,
         user_id=request.current_user.id

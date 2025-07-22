@@ -4,21 +4,22 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import uuid
+from .aws_client import create_s3_client_for_flask
 
 def allowed_file(filename):
-    """Check if file extension is allowed"""
+    """ファイル拡張子が許可されているかをチェック"""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
 def generate_unique_filename(original_filename):
-    """Generate unique filename with timestamp and UUID"""
+    """タイムスタンプとUUIDで一意なファイル名を生成"""
     ext = original_filename.rsplit('.', 1)[1].lower()
     timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
     unique_id = str(uuid.uuid4())[:8]
     return f"{timestamp}_{unique_id}.{ext}"
 
 def save_file_locally(file):
-    """Save file to local filesystem"""
+    """ファイルをローカルファイルシステムに保存"""
     if not file or file.filename == '':
         return None
     
@@ -36,16 +37,11 @@ def save_file_locally(file):
     return f"/uploads/{filename}"
 
 def generate_presigned_url(filename, file_type):
-    """Generate presigned URL for S3 upload"""
+    """S3アップロード用の署名付きURLを生成"""
     if not current_app.config['USE_S3']:
         return None
     
-    s3_client = boto3.client(
-        's3',
-        aws_access_key_id=current_app.config['AWS_ACCESS_KEY_ID'],
-        aws_secret_access_key=current_app.config['AWS_SECRET_ACCESS_KEY'],
-        region_name=current_app.config['AWS_REGION']
-    )
+    s3_client = create_s3_client_for_flask(current_app)
     
     key = f"diary-images/{generate_unique_filename(filename)}"
     
@@ -68,7 +64,7 @@ def generate_presigned_url(filename, file_type):
     }
 
 def delete_file(file_url):
-    """Delete file from storage"""
+    """ストレージからファイルを削除"""
     if not file_url:
         return
     
@@ -78,12 +74,7 @@ def delete_file(file_url):
         if bucket_name in file_url:
             key = file_url.split(f"{bucket_name}/")[-1]
             
-            s3_client = boto3.client(
-                's3',
-                aws_access_key_id=current_app.config['AWS_ACCESS_KEY_ID'],
-                aws_secret_access_key=current_app.config['AWS_SECRET_ACCESS_KEY'],
-                region_name=current_app.config['AWS_REGION']
-            )
+            s3_client = create_s3_client_for_flask(current_app)
             
             try:
                 s3_client.delete_object(Bucket=bucket_name, Key=key)

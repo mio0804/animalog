@@ -1,12 +1,13 @@
 """
-S3 URL utilities for generating presigned URLs for image access
+画像アクセス用の署名付きURL生成のためのS3 URLユーティリティ
 """
 import boto3
 from flask import current_app
 from datetime import datetime, timedelta
+from .aws_client import create_s3_client_for_flask
 
 def get_presigned_url(image_url):
-    """Generate a presigned URL for S3 object access"""
+    """S3オブジェクトアクセス用の署名付きURLを生成"""
     if not image_url or not current_app.config['USE_S3']:
         return image_url
     
@@ -25,12 +26,7 @@ def get_presigned_url(image_url):
         return image_url
     
     # プリサインドURLを生成
-    s3_client = boto3.client(
-        's3',
-        aws_access_key_id=current_app.config['AWS_ACCESS_KEY_ID'],
-        aws_secret_access_key=current_app.config['AWS_SECRET_ACCESS_KEY'],
-        region_name=current_app.config['AWS_REGION']
-    )
+    s3_client = create_s3_client_for_flask(current_app)
     
     try:
         presigned_url = s3_client.generate_presigned_url(

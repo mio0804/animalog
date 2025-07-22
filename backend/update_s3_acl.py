@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 """
-Update ACL for existing S3 objects to make them private (secure with presigned URLs)
+既存のS3オブジェクトのACLをプライベートに更新（署名付きURLでセキュア化）
 """
 import boto3
 from config import Config
+from utils.aws_client import create_s3_client_for_script
 
 def update_s3_acl():
     config = Config()
@@ -13,12 +14,7 @@ def update_s3_acl():
         return
     
     # S3クライアントを初期化
-    s3_client = boto3.client(
-        's3',
-        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,
-        region_name=config.AWS_REGION
-    )
+    s3_client = create_s3_client_for_script(config)
     
     # diary-imagesプレフィックス内のすべてのオブジェクトをリスト
     try:
