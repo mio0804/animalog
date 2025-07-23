@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Callback from './pages/Callback';
 import PetList from './pages/PetList';
 import PetForm from './pages/PetForm';
 import PetDetail from './pages/PetDetail';
@@ -21,6 +22,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/callback" element={<Callback />} />
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Home />} />
             <Route path="profile" element={<UserProfile />} />

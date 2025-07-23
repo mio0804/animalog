@@ -25,6 +25,10 @@ class Config:
     COGNITO_REGION = os.getenv('COGNITO_REGION', 'ap-northeast-1')
     COGNITO_USER_POOL_ID = os.getenv('COGNITO_USER_POOL_ID')
     COGNITO_APP_CLIENT_ID = os.getenv('COGNITO_APP_CLIENT_ID')
+    COGNITO_APP_CLIENT_SECRET = os.getenv('COGNITO_APP_CLIENT_SECRET')
+    COGNITO_DOMAIN = os.getenv('COGNITO_DOMAIN')
+    COGNITO_REDIRECT_URI = os.getenv('COGNITO_REDIRECT_URI', 'http://localhost:3000/callback')
+    COGNITO_LOGOUT_URI = os.getenv('COGNITO_LOGOUT_URI', 'http://localhost:3000/login')
     
     # ファイルアップロード設定
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/workspace/uploads')

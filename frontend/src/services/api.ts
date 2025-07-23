@@ -24,6 +24,14 @@ export const authAPI = {
     const response = await api.post('/auth/login');
     return response.data;
   },
+  logout: async () => {
+    const response = await api.post('/auth/logout');
+    return response.data;
+  },
+  callback: async (code: string) => {
+    const response = await api.post('/auth/callback', { code });
+    return response.data;
+  },
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;

@@ -13,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,6 +54,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async () => {
     try {
       const response = await authAPI.login();
+      
+      // Cognito使用時はURLリダイレクト
+      if (response.auth_url) {
+        window.location.href = response.auth_url;
+        return;
+      }
+      
+      // 開発モード
       localStorage.setItem('token', response.token);
       setUser(response.user);
     } catch (error) {
@@ -62,9 +70,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+  const logout = async () => {
+    try {
+      const response = await authAPI.logout();
+      
+      // Cognito使用時はURLリダイレクト
+      if (response.logout_url) {
+        localStorage.removeItem('token');
+        window.location.href = response.logout_url;
+        return;
+      }
+      
+      // 開発モード
+      localStorage.removeItem('token');
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+      localStorage.removeItem('token');
+      setUser(null);
+    }
   };
 
   return (
