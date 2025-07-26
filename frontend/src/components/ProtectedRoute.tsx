@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isLoggingOut } = useAuth();
 
   if (isLoading) {
     return (
@@ -19,8 +19,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  if (!user) {
+  // ログアウト中はリダイレクトを行わず、Cognitoの自動リダイレクトに任せる
+  if (!user && !isLoggingOut) {
     return <Navigate to="/login" replace />;
+  }
+
+  // ログアウト中で且つユーザーがnullの場合は何も表示しない（Cognitoがリダイレクト処理中）
+  if (!user && isLoggingOut) {
+    return (
+      <Container className="text-center py-5">
+        <Spinner animation="border" />
+        <p className="mt-2">ログアウト中...</p>
+      </Container>
+    );
   }
 
   return <>{children}</>;

@@ -18,20 +18,8 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 認証API
+// 認証API（バックエンドのユーザー情報取得のみ）
 export const authAPI = {
-  login: async () => {
-    const response = await api.post('/auth/login');
-    return response.data;
-  },
-  logout: async () => {
-    const response = await api.post('/auth/logout');
-    return response.data;
-  },
-  callback: async (code: string) => {
-    const response = await api.post('/auth/callback', { code });
-    return response.data;
-  },
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;

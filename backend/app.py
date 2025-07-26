@@ -1,6 +1,6 @@
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from config import Config
+from config import Config, validate_config
 from models import db
 from routes.auth import auth_bp
 from routes.pets import pets_bp
@@ -8,6 +8,9 @@ from routes.diaries import diaries_bp
 import os
 
 def create_app():
+    # 環境変数のバリデーション
+    validate_config()
+    
     app = Flask(__name__)
     app.config.from_object(Config)
     

@@ -4,6 +4,36 @@ from dotenv import load_dotenv
 # 環境変数を読み込み
 load_dotenv()
 
+def validate_config():
+    """重要な環境変数が設定されているかチェック"""
+    required_vars = ['FLASK_APP', 'DATABASE_URL', 'SECRET_KEY']
+    missing_vars = []
+    
+    for var in required_vars:
+        if not os.getenv(var):
+            missing_vars.append(var)
+    
+    if missing_vars:
+        raise ValueError(f"Required environment variables are missing: {', '.join(missing_vars)}")
+    
+    # USE_COGNITOがtrueの場合、Cognito関連の変数をチェック
+    if os.getenv('USE_COGNITO', 'false').lower() == 'true':
+        cognito_vars = ['COGNITO_USER_POOL_ID', 'COGNITO_APP_CLIENT_ID', 'COGNITO_DOMAIN']
+        missing_cognito = [var for var in cognito_vars if not os.getenv(var)]
+        if missing_cognito:
+            raise ValueError(f"Cognito mode requires these variables: {', '.join(missing_cognito)}")
+    
+    # USE_S3がtrueの場合、S3関連の変数をチェック
+    if os.getenv('USE_S3', 'false').lower() == 'true':
+        s3_vars = ['AWS_REGION', 'S3_BUCKET_NAME']
+        missing_s3 = [var for var in s3_vars if not os.getenv(var)]
+        if missing_s3:
+            raise ValueError(f"S3 mode requires these variables: {', '.join(missing_s3)}")
+        
+        # AWS認証情報の確認（IAMロール使用時は不要）
+        if not os.getenv('AWS_ACCESS_KEY_ID') and not os.getenv('AWS_SECRET_ACCESS_KEY'):
+            print("Warning: AWS credentials not set. Make sure IAM role is configured for S3 access.")
+
 class Config:
     # Flask設定
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
@@ -20,12 +50,11 @@ class Config:
     AWS_REGION = os.getenv('AWS_REGION', 'ap-northeast-1')
     S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
     
-    # Cognito設定
+    # Cognito設定（SPAパブリッククライアント用）
     USE_COGNITO = os.getenv('USE_COGNITO', 'false').lower() == 'true'
     COGNITO_REGION = os.getenv('COGNITO_REGION', 'ap-northeast-1')
     COGNITO_USER_POOL_ID = os.getenv('COGNITO_USER_POOL_ID')
     COGNITO_APP_CLIENT_ID = os.getenv('COGNITO_APP_CLIENT_ID')
-    COGNITO_APP_CLIENT_SECRET = os.getenv('COGNITO_APP_CLIENT_SECRET')
     COGNITO_DOMAIN = os.getenv('COGNITO_DOMAIN')
     COGNITO_REDIRECT_URI = os.getenv('COGNITO_REDIRECT_URI', 'http://localhost:3000/callback')
     COGNITO_LOGOUT_URI = os.getenv('COGNITO_LOGOUT_URI', 'http://localhost:3000/login')
@@ -41,4 +70,8 @@ class Config:
     MOCK_USER_NAME = os.getenv('MOCK_USER_NAME', 'テスト')
     
     # CORS
-    CORS_ORIGINS = ['http://localhost:3000', 'http://localhost:5000']
+    CORS_ORIGINS = [
+        'http://localhost:3000', 
+        'http://localhost:5000',
+        'https://refactored-guide-975pv96xg954cx666-3000.app.github.dev'
+    ]

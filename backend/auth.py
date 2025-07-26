@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import request, jsonify, current_app
 from jose import jwt, JWTError
+from jose.exceptions import JWTClaimsError, ExpiredSignatureError
 from datetime import datetime
 import requests
 from models import User, db
@@ -57,6 +58,7 @@ def login_required(f):
 
 def verify_cognito_token(token):
     """Cognito JWTトークンを検証"""
+    
     try:
         # Cognito公開鍵を取得
         region = current_app.config['COGNITO_REGION']
@@ -64,30 +66,49 @@ def verify_cognito_token(token):
         keys_url = f'https://cognito-idp.{region}.amazonaws.com/{user_pool_id}/.well-known/jwks.json'
         
         response = requests.get(keys_url)
+        if response.status_code != 200:
+            current_app.logger.error(f"JWKS取得失敗: {response.status_code}")
+            return None
+        
         keys = response.json()['keys']
         
         # トークンヘッダをデコードしてkidを取得
         headers = jwt.get_unverified_headers(token)
         kid = headers['kid']
         
+        
         # 正しいキーを検索
         key = next((k for k in keys if k['kid'] == kid), None)
         if not key:
+            current_app.logger.error(f"JWT key not found for kid: {kid}")
             return None
         
         # トークンを検証してデコード
+        # at_hashの検証をスキップするオプションを追加
         payload = jwt.decode(
             token,
             key,
             algorithms=['RS256'],
-            audience=current_app.config['COGNITO_APP_CLIENT_ID']
+            audience=current_app.config['COGNITO_APP_CLIENT_ID'],
+            options={"verify_at_hash": False}
         )
         
         # トークンの有効期限を検証
         if datetime.fromtimestamp(payload['exp']) < datetime.utcnow():
+            current_app.logger.warning("Token expired")
             return None
         
         return payload
         
-    except (JWTError, KeyError, requests.RequestException):
+    except JWTClaimsError as e:
+        current_app.logger.warning(f"JWT claims validation failed: {e}")
+        return None
+    except ExpiredSignatureError:
+        current_app.logger.warning("JWT token expired")
+        return None
+    except JWTError as e:
+        current_app.logger.error(f"JWT validation error: {e}")
+        return None
+    except (KeyError, requests.RequestException) as e:
+        current_app.logger.error(f"Token verification error: {e}")
         return None

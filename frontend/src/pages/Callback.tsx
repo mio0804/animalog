@@ -1,66 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Container, Spinner, Alert } from 'react-bootstrap';
-import { authAPI } from '../services/api';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Container, Spinner } from 'react-bootstrap';
+import { useAuth } from '../contexts/AuthContext';
 
 const Callback: React.FC = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const { refreshAuth } = useAuth();
 
   useEffect(() => {
     const handleCallback = async () => {
-      const code = searchParams.get('code');
-      const error = searchParams.get('error');
-
-      if (error) {
-        setError('認証エラーが発生しました');
-        setTimeout(() => {
-          navigate('/login');
-        }, 3000);
-        return;
-      }
-
-      if (!code) {
-        setError('認証コードが見つかりません');
-        setTimeout(() => {
-          navigate('/login');
-        }, 3000);
-        return;
-      }
-
+      // AWS Amplifyが自動的にコールバックを処理
+      // 認証状態を更新してホーム画面へ遷移
       try {
-        const response = await authAPI.callback(code);
-        localStorage.setItem('token', response.token);
-        navigate('/');
-      } catch (err) {
-        console.error('Callback error:', err);
-        setError('認証処理中にエラーが発生しました');
+        console.log('Callback: Starting authentication refresh...');
+        await refreshAuth();
+        
+        // 少し待機してから遷移（状態更新を確実にするため）
         setTimeout(() => {
-          navigate('/login');
-        }, 3000);
+          console.log('Callback: Navigating to home...');
+          navigate('/');
+        }, 100);
+      } catch (error) {
+        console.error('Callback error:', error);
+        navigate('/login');
       }
     };
 
-    handleCallback();
-  }, [searchParams, navigate]);
+    // 少し遅延させてAmplifyの処理を確実に完了させる
+    const timer = setTimeout(handleCallback, 200);
+    
+    return () => clearTimeout(timer);
+  }, [navigate, refreshAuth]);
 
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
       <div className="text-center">
-        {error ? (
-          <>
-            <Alert variant="danger">{error}</Alert>
-            <p>ログインページに戻ります...</p>
-          </>
-        ) : (
-          <>
-            <Spinner animation="border" role="status" className="mb-3">
-              <span className="visually-hidden">認証処理中...</span>
-            </Spinner>
-            <p>認証処理中です。しばらくお待ちください...</p>
-          </>
-        )}
+        <Spinner animation="border" role="status" className="mb-3">
+          <span className="visually-hidden">認証処理中...</span>
+        </Spinner>
+        <p>認証処理中です。しばらくお待ちください...</p>
       </div>
     </Container>
   );

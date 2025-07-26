@@ -9,9 +9,20 @@ const Layout: React.FC = () => {
   const location = useLocation();
 
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      
+      // Mock認証の場合のみ手動でナビゲーション
+      // Cognito認証の場合は自動リダイレクトに任せる
+      if (import.meta.env.VITE_USE_COGNITO !== 'true') {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Logout error in Layout:', error);
+      // エラーが発生した場合も手動でログイン画面に遷移
+      navigate('/login');
+    }
   };
 
   // 現在のパスをチェックして該当するナビゲーションリンクを非表示にする
