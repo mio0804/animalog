@@ -36,14 +36,17 @@ def save_file_locally(file):
     # ローカルファイルの相対的URLを返す
     return f"/uploads/{filename}"
 
-def generate_presigned_url(filename, file_type):
+def generate_presigned_url(filename, file_type, user_id=None):
     """S3アップロード用の署名付きURLを生成"""
     if not current_app.config['USE_S3']:
         return None
     
     s3_client = create_s3_client_for_flask(current_app)
     
-    key = f"diary-images/{generate_unique_filename(filename)}"
+    if user_id:
+        key = f"users/{user_id}/diary-images/{generate_unique_filename(filename)}"
+    else:
+        key = f"diary-images/{generate_unique_filename(filename)}"
     
     presigned_url = s3_client.generate_presigned_url(
         'put_object',
@@ -63,7 +66,7 @@ def generate_presigned_url(filename, file_type):
         'file_url': file_url
     }
 
-def delete_file(file_url):
+def delete_file(file_url, user_id=None):
     """ストレージからファイルを削除"""
     if not file_url:
         return
@@ -71,15 +74,25 @@ def delete_file(file_url):
     if current_app.config['USE_S3']:
         # S3 URLからキーを抽出
         bucket_name = current_app.config['S3_BUCKET_NAME']
-        if bucket_name in file_url:
-            key = file_url.split(f"{bucket_name}/")[-1]
+        region = current_app.config['AWS_REGION']
+        
+        # URLパターン: https://{bucket}.s3.{region}.amazonaws.com/{key}
+        expected_prefix = f"https://{bucket_name}.s3.{region}.amazonaws.com/"
+        
+        if file_url.startswith(expected_prefix):
+            key = file_url[len(expected_prefix):]
+            
+            current_app.logger.info(f"Attempting to delete S3 object: Bucket={bucket_name}, Key={key}")
             
             s3_client = create_s3_client_for_flask(current_app)
             
             try:
                 s3_client.delete_object(Bucket=bucket_name, Key=key)
+                current_app.logger.info(f"Successfully deleted S3 object: {key}")
             except Exception as e:
-                current_app.logger.error(f"Failed to delete S3 object: {e}")
+                current_app.logger.error(f"Failed to delete S3 object: Bucket={bucket_name}, Key={key}, Error={e}")
+        else:
+            current_app.logger.error(f"Invalid S3 URL format: {file_url}")
     else:
         # ローカルファイルを削除
         if file_url.startswith('/uploads/'):

@@ -110,7 +110,7 @@ def create_diary():
                 
                 # 一意なファイル名を生成
                 filename = generate_unique_filename(secure_filename(image_file.filename))
-                key = f"diary-images/{filename}"
+                key = f"users/{request.current_user.id}/diary-images/{filename}"
                 
                 # パブリック読み取りアクセスでS3にファイルをアップロード
                 s3_client.upload_fileobj(
@@ -186,7 +186,7 @@ def delete_diary(diary_id):
     
     # 関連する画像がある場合は削除
     if diary.image_url:
-        delete_file(diary.image_url)
+        delete_file(diary.image_url, user_id=request.current_user.id)
     
     db.session.delete(diary)
     db.session.commit()
@@ -210,7 +210,7 @@ def get_presigned_url():
     if not allowed_file(filename):
         return jsonify({'error': 'Invalid file type'}), 400
     
-    result = generate_presigned_url(filename, file_type)
+    result = generate_presigned_url(filename, file_type, user_id=request.current_user.id)
     if not result:
         return jsonify({'error': 'Failed to generate upload URL'}), 500
     
