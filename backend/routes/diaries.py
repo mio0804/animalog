@@ -1,9 +1,7 @@
 from flask import Blueprint, jsonify, request, current_app
-from werkzeug.utils import secure_filename
 from auth import login_required
 from models import db, Diary, Pet
-from utils.s3 import save_file_locally, generate_presigned_url, delete_file, allowed_file
-from utils.aws_client import create_s3_client_for_flask
+from utils.s3 import generate_presigned_url, delete_file, allowed_file
 
 diaries_bp = Blueprint('diaries', __name__)
 
@@ -73,13 +71,8 @@ def get_diary(diary_id):
 @login_required
 def create_diary():
     """新しい日記エントリを作成"""
-    # JSONとmultipart/form-dataの両方を処理
-    if request.is_json:
-        data = request.get_json()
-        image_file = None
-    else:
-        data = request.form.to_dict()
-        image_file = request.files.get('image')
+    # JSONデータのみ受け付ける（FormDataは受け付けない）
+    data = request.get_json()
     
     # 必須フィールドを検証
     if not data.get('pet_id') or not data.get('content'):
@@ -94,45 +87,8 @@ def create_diary():
     if not pet:
         return jsonify({'error': 'Pet not found'}), 404
     
-    # 画像が提供された場合のアップロード処理
-    image_url = None
-    if image_file and image_file.filename != '':
-        if not allowed_file(image_file.filename):
-            return jsonify({'error': 'Invalid file type'}), 400
-        
-        if current_app.config['USE_S3']:
-            # S3の場合、プリサインドURLを生成して直接アップロード
-            try:
-                import boto3
-                from utils.s3 import generate_unique_filename
-                
-                s3_client = create_s3_client_for_flask(current_app)
-                
-                # 一意なファイル名を生成
-                filename = generate_unique_filename(secure_filename(image_file.filename))
-                key = f"users/{request.current_user.id}/diary-images/{filename}"
-                
-                # パブリック読み取りアクセスでS3にファイルをアップロード
-                s3_client.upload_fileobj(
-                    image_file,
-                    current_app.config['S3_BUCKET_NAME'],
-                    key,
-                    ExtraArgs={
-                        'ContentType': image_file.content_type
-                    }
-                )
-                
-                # パブリックURLを生成
-                image_url = f"https://{current_app.config['S3_BUCKET_NAME']}.s3.{current_app.config['AWS_REGION']}.amazonaws.com/{key}"
-                
-            except Exception as e:
-                current_app.logger.error(f"Failed to upload to S3: {e}")
-                return jsonify({'error': 'Failed to upload image'}), 500
-        else:
-            image_url = save_file_locally(image_file)
-    elif data.get('image_url'):
-        # 画像はすでにプリサインドURL経由でアップロード済み
-        image_url = data['image_url']
+    # 画像URLの処理（署名付きURL経由でアップロード済み）
+    image_url = data.get('image_url')
     
     # 日記エントリを作成
     diary = Diary(

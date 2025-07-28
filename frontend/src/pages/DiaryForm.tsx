@@ -75,21 +75,51 @@ const DiaryForm: React.FC = () => {
     setError('');
 
     try {
-      const submitData = new FormData();
-      submitData.append('pet_id', formData.pet_id);
-      submitData.append('content', formData.content);
-      if (formData.title) {
-        submitData.append('title', formData.title);
-      }
+      let imageUrl = existingImageUrl;
+
+      // 新しい画像が選択されている場合は、署名付きURLを使ってS3に直接アップロード
       if (selectedFile) {
-        submitData.append('image', selectedFile);
+        try {
+          // 1. 署名付きURLを取得
+          const presignedResponse = await diariesAPI.getPresignedUrl(
+            selectedFile.name,
+            selectedFile.type
+          );
+
+          // 2. S3に直接アップロード
+          const uploadResponse = await fetch(presignedResponse.upload_url, {
+            method: 'PUT',
+            body: selectedFile,
+            headers: {
+              'Content-Type': selectedFile.type,
+            },
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error('画像のアップロードに失敗しました');
+          }
+
+          // 3. アップロード成功後のURLを使用
+          imageUrl = presignedResponse.file_url;
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          throw new Error('画像のアップロードに失敗しました');
+        }
       }
 
+      // 日記データの準備（画像はURLとして送信）
+      const diaryData = {
+        pet_id: formData.pet_id,
+        content: formData.content,
+        title: formData.title || undefined,
+        image_url: imageUrl || undefined,
+      };
+
       if (isEditMode && id) {
-        await diariesAPI.update(id, submitData);
+        await diariesAPI.update(id, diaryData);
         navigate(`/diaries/${id}`);
       } else {
-        await diariesAPI.create(submitData);
+        await diariesAPI.create(diaryData);
         if (petId) {
           navigate(`/pets/${petId}/diaries`);
         } else {
