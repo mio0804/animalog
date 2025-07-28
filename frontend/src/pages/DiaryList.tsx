@@ -74,21 +74,23 @@ const DiaryList: React.FC = () => {
 
   return (
     <Container>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>
-          {pet ? `${pet.name}の日記` : '全ての日記'}
-        </h2>
-        <div className="d-flex gap-2">
-          {petId && (
-            <Link to={`/pets/${petId}/diaries/new`}>
-              <Button variant="primary">新しい日記を書く</Button>
-            </Link>
-          )}
-          {!petId && (
-            <Link to="/pets">
-              <Button variant="outline-primary">ペット一覧に戻る</Button>
-            </Link>
-          )}
+      <div className="mb-4">
+        <div className="d-flex justify-content-between align-items-start flex-column flex-md-row gap-3">
+          <h2 className="mb-0">
+            {pet ? `${pet.name}の日記` : '全ての日記'}
+          </h2>
+          <div className="d-flex gap-2 flex-wrap">
+            {petId && (
+              <Link to={`/pets/${petId}/diaries/new`}>
+                <Button variant="primary" size="sm">新しい日記を書く</Button>
+              </Link>
+            )}
+            {!petId && (
+              <Link to="/pets">
+                <Button variant="outline-primary" size="sm">ペット一覧に戻る</Button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
@@ -129,7 +131,7 @@ const DiaryList: React.FC = () => {
                         {formatDate(diary.created_at)}
                       </small>
                     </Card.Text>
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-2 flex-wrap mt-2">
                       <Link to={`/diaries/${diary.id}`}>
                         <Button variant="primary" size="sm">詳細</Button>
                       </Link>

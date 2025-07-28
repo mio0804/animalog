@@ -85,18 +85,20 @@ const DiaryDetail: React.FC = () => {
 
   return (
     <Container>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>{diary.title || '無題の日記'}</h2>
-        <div className="d-flex gap-2">
-          <Link to={`/diaries/${diary.id}/edit`}>
-            <Button variant="primary">編集</Button>
-          </Link>
-          <Button variant="danger" onClick={handleDelete}>
-            削除
-          </Button>
-          <Link to="/diaries">
-            <Button variant="secondary">一覧に戻る</Button>
-          </Link>
+      <div className="mb-4">
+        <div className="d-flex justify-content-between align-items-start flex-column flex-md-row gap-3">
+          <h2 className="mb-0">{diary.title || '無題の日記'}</h2>
+          <div className="d-flex gap-2 flex-wrap">
+            <Link to={`/diaries/${diary.id}/edit`}>
+              <Button variant="primary" size="sm">編集</Button>
+            </Link>
+            <Button variant="danger" size="sm" onClick={handleDelete}>
+              削除
+            </Button>
+            <Link to="/diaries">
+              <Button variant="secondary" size="sm">一覧に戻る</Button>
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -85,11 +85,15 @@ const UserProfile: React.FC = () => {
 
   return (
     <Container>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>ユーザープロフィール</h2>
-        <Link to="/">
-          <Button variant="secondary">ホームに戻る</Button>
-        </Link>
+      <div className="mb-4">
+        <div className="d-flex justify-content-between align-items-start flex-column flex-md-row gap-3">
+          <h2 className="mb-0">ユーザープロフィール</h2>
+          <div className="d-flex gap-2 flex-wrap">
+            <Link to="/">
+              <Button variant="secondary" size="sm">ホームに戻る</Button>
+            </Link>
+          </div>
+        </div>
       </div>
 
       {error && <Alert variant="danger">{error}</Alert>}
@@ -162,8 +166,8 @@ const UserProfile: React.FC = () => {
                   {pets.map((pet) => (
                     <Card key={pet.id} className="mb-3">
                       <Card.Body>
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
+                        <div className="d-flex justify-content-between align-items-start flex-column flex-sm-row gap-2">
+                          <div className="flex-grow-1">
                             <h6 className="mb-1">{pet.name}</h6>
                             <p className="text-muted small mb-0">
                               {pet.species}
@@ -173,7 +177,7 @@ const UserProfile: React.FC = () => {
                               日記: {pet.diary_count || 0}件
                             </p>
                           </div>
-                          <div>
+                          <div className="d-flex gap-2 flex-wrap mt-2">
                             <Link to={`/pets/${pet.id}`}>
                               <Button variant="outline-primary" size="sm">詳細</Button>
                             </Link>

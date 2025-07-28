@@ -45,11 +45,15 @@ const PetList: React.FC = () => {
 
   return (
     <Container>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>ペット一覧</h2>
-        <Link to="/pets/new">
-          <Button variant="primary">新しいペットを登録</Button>
-        </Link>
+      <div className="mb-4">
+        <div className="d-flex justify-content-between align-items-start flex-column flex-md-row gap-3">
+          <h2 className="mb-0">ペット一覧</h2>
+          <div className="d-flex gap-2 flex-wrap">
+            <Link to="/pets/new">
+              <Button variant="primary" size="sm">新しいペットを登録</Button>
+            </Link>
+          </div>
+        </div>
       </div>
 
       {error && <Alert variant="danger">{error}</Alert>}
@@ -75,7 +79,7 @@ const PetList: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <div className="d-flex gap-2 mt-3">
+                  <div className="d-flex gap-2 flex-wrap mt-3">
                     <Link to={`/pets/${pet.id}`}>
                       <Button variant="primary" size="sm">詳細</Button>
                     </Link>

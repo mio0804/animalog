@@ -35,6 +35,7 @@ function App() {
             <Route path="diaries/:id" element={<DiaryDetail />} />
             <Route path="diaries/:id/edit" element={<DiaryForm />} />
             <Route path="pets/:petId/diaries" element={<DiaryList />} />
+            <Route path="pets/:petId/diaries/new" element={<DiaryForm />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

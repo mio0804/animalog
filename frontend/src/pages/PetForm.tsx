@@ -132,10 +132,11 @@ const PetForm: React.FC = () => {
               />
             </Form.Group>
 
-            <div className="d-flex gap-2">
+            <div className="d-flex gap-2 flex-wrap">
               <Button
                 type="submit"
                 variant="primary"
+                size="sm"
                 disabled={isLoading}
               >
                 {isLoading ? '保存中...' : (isEdit ? '更新' : '登録')}
@@ -143,6 +144,7 @@ const PetForm: React.FC = () => {
               <Button
                 type="button"
                 variant="secondary"
+                size="sm"
                 onClick={() => navigate('/pets')}
               >
                 キャンセル

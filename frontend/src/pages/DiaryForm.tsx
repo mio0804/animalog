@@ -265,10 +265,11 @@ const DiaryForm: React.FC = () => {
               </div>
             )}
 
-            <div className="d-flex gap-2">
+            <div className="d-flex gap-2 flex-wrap">
               <Button
                 type="submit"
                 variant="primary"
+                size="sm"
                 disabled={isLoading}
               >
                 {isLoading ? (isEditMode ? '更新中...' : '投稿中...') : (isEditMode ? '更新' : '投稿')}
@@ -276,6 +277,7 @@ const DiaryForm: React.FC = () => {
               <Button
                 type="button"
                 variant="secondary"
+                size="sm"
                 onClick={() => navigate(-1)}
               >
                 キャンセル
