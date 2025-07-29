@@ -4,14 +4,65 @@ from dotenv import load_dotenv
 # 環境変数を読み込み
 load_dotenv()
 
+def get_database_url():
+    """環境に応じたデータベースURLを構築"""
+    # RDS使用フラグの確認
+    use_rds = os.getenv('USE_RDS', 'false').lower() == 'true'
+    
+    if use_rds:
+        # 本番環境: RDS + Secrets Manager
+        try:
+            from backend.utils.secrets_manager import get_rds_password
+            
+            # 必要な環境変数を取得
+            secret_name = os.getenv('AWS_SECRETS_MANAGER_SECRET_NAME')
+            rds_endpoint = os.getenv('RDS_ENDPOINT')
+            rds_database = os.getenv('RDS_DATABASE', 'animalog')
+            rds_username = os.getenv('RDS_USERNAME', 'animalog')
+            aws_region = os.getenv('AWS_REGION', 'ap-northeast-1')
+            
+            if not secret_name:
+                raise ValueError("AWS_SECRETS_MANAGER_SECRET_NAME is required when USE_RDS=true")
+            if not rds_endpoint:
+                raise ValueError("RDS_ENDPOINT is required when USE_RDS=true")
+            
+            # Secrets Managerからパスワードを取得
+            password = get_rds_password(secret_name, aws_region)
+            
+            # DATABASE_URLを構築
+            return f"postgresql://{rds_username}:{password}@{rds_endpoint}:5432/{rds_database}"
+            
+        except Exception as e:
+            print(f"Error retrieving RDS password: {str(e)}")
+            # フォールバック: 環境変数から直接取得
+            fallback_url = os.getenv('DATABASE_URL')
+            if fallback_url:
+                return fallback_url
+            raise
+    else:
+        # 開発環境: ローカルPostgreSQL
+        return os.getenv('DATABASE_URL', 'postgresql://animalog:animalog@db:5432/animalog')
+
 def validate_config():
     """重要な環境変数が設定されているかチェック"""
-    required_vars = ['FLASK_APP', 'DATABASE_URL', 'SECRET_KEY']
+    required_vars = ['FLASK_APP', 'SECRET_KEY']
     missing_vars = []
     
     for var in required_vars:
         if not os.getenv(var):
             missing_vars.append(var)
+    
+    # RDS使用時の追加チェック
+    use_rds = os.getenv('USE_RDS', 'false').lower() == 'true'
+    if use_rds:
+        rds_vars = ['AWS_SECRETS_MANAGER_SECRET_NAME', 'RDS_ENDPOINT']
+        missing_rds = [var for var in rds_vars if not os.getenv(var)]
+        if missing_rds:
+            missing_vars.extend(missing_rds)
+    else:
+        # 開発環境ではDATABASE_URLが必要
+        if not os.getenv('DATABASE_URL'):
+            missing_vars.append('DATABASE_URL')
     
     if missing_vars:
         raise ValueError(f"Required environment variables are missing: {', '.join(missing_vars)}")
@@ -40,7 +91,7 @@ class Config:
     DEBUG = os.getenv('FLASK_ENV', 'development') == 'development'
     
     # データベース設定
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://animalog:animalog@db:5432/animalog')
+    SQLALCHEMY_DATABASE_URI = get_database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # AWS S3
