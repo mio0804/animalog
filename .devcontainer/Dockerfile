@@ -24,6 +24,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # claude をインストール
 RUN npm install -g @anthropic-ai/claude-code
 
+# AWS CLI v2をインストール（本番環境でのECS Exec、S3操作に必須）
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf awscliv2.zip aws
+
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
@@ -42,7 +48,3 @@ RUN mkdir -p /workspace && chown -R $USERNAME:$USERNAME /workspace
 
 # vscode ユーザに切り替える
 USER $USERNAME
-
-## 開発中のため CMD は使わず、VSCode から起動する
-# Flask アプリを Gunicorn 経由で自動的に起動
-# CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
