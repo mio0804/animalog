@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Spinner, Alert, Row, Col } from 'react-bootstrap';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { petsAPI, diariesAPI } from '../services/api';
-import { Pet, Diary } from '../types/index.js';
+import type { Pet, Diary } from '../types/index.js';
 
 const PetDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,7 +29,7 @@ const PetDetail: React.FC = () => {
       
       // 最新の日記を取得（最大3件）
       try {
-        const diariesResponse = await diariesAPI.getAllByPet(id, 1, 3);
+        const diariesResponse = await diariesAPI.getAllByPet(id, 1);
         setRecentDiaries(diariesResponse.diaries);
       } catch (err) {
         // 日記の取得に失敗してもペット詳細は表示
@@ -54,7 +54,7 @@ const PetDetail: React.FC = () => {
     }
   };
 
-  const calculateAge = (birthDate: string | null) => {
+  const calculateAge = (birthDate: string | null | undefined) => {
     if (!birthDate) return null;
     
     const birth = new Date(birthDate);
@@ -107,7 +107,7 @@ const PetDetail: React.FC = () => {
     );
   }
 
-  const age = calculateAge(pet.birth_date);
+  const age = calculateAge(pet.birth_date || null);
 
   return (
     <Container>

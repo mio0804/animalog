@@ -30,7 +30,8 @@ export interface Diary {
 
 // ページネーションレスポンス型定義
 export interface PaginatedResponse<T> {
-  [key: string]: T[];
+  diaries?: T[];  // 日記API用
+  pets?: T[];     // ペットAPI用
   total: number;
   pages: number;
   current_page: number;

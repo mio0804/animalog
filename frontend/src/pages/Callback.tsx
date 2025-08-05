@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Spinner } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
+import { logger } from '../utils/logger';
 
 const Callback: React.FC = () => {
   const navigate = useNavigate();
@@ -12,16 +13,16 @@ const Callback: React.FC = () => {
       // AWS Amplifyが自動的にコールバックを処理
       // 認証状態を更新してホーム画面へ遷移
       try {
-        console.log('Callback: Starting authentication refresh...');
+        logger.log('Callback: Starting authentication refresh...');
         await refreshAuth();
         
         // 少し待機してから遷移（状態更新を確実にするため）
         setTimeout(() => {
-          console.log('Callback: Navigating to home...');
+          logger.log('Callback: Navigating to home...');
           navigate('/');
         }, 100);
       } catch (error) {
-        console.error('Callback error:', error);
+        logger.error('Callback error:', error);
         navigate('/login');
       }
     };

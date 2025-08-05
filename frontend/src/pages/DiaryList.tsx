@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Spinner, Alert, Pagination } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import { diariesAPI, petsAPI } from '../services/api';
-import { Diary, Pet, PaginatedResponse } from '../types/index.js';
+import type { Diary, Pet, PaginatedResponse } from '../types/index.js';
 
 const DiaryList: React.FC = () => {
   const { petId } = useParams<{ petId: string }>();
@@ -39,7 +39,7 @@ const DiaryList: React.FC = () => {
       } else {
         response = await diariesAPI.getAll(page);
       }
-      setDiaries(response.diaries);
+      setDiaries(response.diaries || []);
       setTotalPages(response.pages);
       setCurrentPage(page);
     } catch (err) {

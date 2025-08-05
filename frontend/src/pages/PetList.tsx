@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { petsAPI } from '../services/api';
-import { Pet } from '../types/index.js';
+import type { Pet } from '../types/index.js';
 
 const PetList: React.FC = () => {
   const [pets, setPets] = useState<Pet[]>([]);

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { createAuthService, type AuthService, type User } from '../services/auth/index.ts';
 import { authAPI } from '../services/api';
+import { logger } from '../utils/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -70,14 +71,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         } catch (error) {
           // バックエンドが利用できない場合はCognitoの情報を使用
-          console.log('Using Cognito user info:', currentUser);
+          logger.log('Using Cognito user info:', currentUser);
           setUser(currentUser);
         }
       } else {
         setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      logger.error('Auth check failed:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -88,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await authService.signIn();
     } catch (error) {
-      console.error('Login failed:', error);
+      logger.error('Login failed:', error);
       throw error;
     }
   };
@@ -113,7 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       // Cognito環境ではリダイレクト後にページがリロードされるため、isLoggingOutは自動的にリセットされる
     } catch (error) {
-      console.error('Logout failed:', error);
+      logger.error('Logout failed:', error);
       // エラーが発生してもローカルの状態はクリア
       localStorage.removeItem('token');
       setUser(null);

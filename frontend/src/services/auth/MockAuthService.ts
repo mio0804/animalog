@@ -1,6 +1,7 @@
 // 開発環境用のモック認証サービス
 
 import { type AuthService, type User } from './types.ts';
+import { logger } from '../../utils/logger';
 
 export class MockAuthService implements AuthService {
   private mockUser: User = {
@@ -11,7 +12,7 @@ export class MockAuthService implements AuthService {
   };
 
   async initialize(): Promise<void> {
-    console.log('MockAuthService initialized');
+    logger.log('MockAuthService initialized');
   }
 
   async getCurrentUser(): Promise<User | null> {
@@ -32,7 +33,7 @@ export class MockAuthService implements AuthService {
 
   async handleCallback(code: string): Promise<void> {
     // 開発環境ではコールバック処理は不要
-    console.log('Mock callback handler called with code:', code);
+    logger.log('Mock callback handler called with code:', code);
   }
 
   async getIdToken(): Promise<string | null> {

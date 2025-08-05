@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Card } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import { petsAPI } from '../services/api';
-import { Pet } from '../types/index.js';
+import type { Pet } from '../types/index.js';
 
 const PetForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();

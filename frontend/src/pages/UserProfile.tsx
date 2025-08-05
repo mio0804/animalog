@@ -3,7 +3,7 @@ import { Container, Card, Row, Col, Button, Alert, Badge } from 'react-bootstrap
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { petsAPI, diariesAPI } from '../services/api';
-import { Pet } from '../types/index.js';
+import type { Pet } from '../types/index.js';
 
 const UserProfile: React.FC = () => {
   const { user } = useAuth();
@@ -13,7 +13,7 @@ const UserProfile: React.FC = () => {
     totalDiaries: 0,
     recentDiaries: 0
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -41,11 +41,11 @@ const UserProfile: React.FC = () => {
       
       // 最近30日の日記数を取得（簡易的に全日記から計算）
       try {
-        const diariesResponse = await diariesAPI.getAll(1, 100); // 最大100件取得
+        const diariesResponse = await diariesAPI.getAll(1); // ページ1を取得
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         
-        recentDiaries = diariesResponse.diaries.filter(diary => 
+        recentDiaries = diariesResponse.diaries.filter((diary: any) => 
           new Date(diary.created_at) > thirtyDaysAgo
         ).length;
       } catch (err) {
@@ -66,13 +66,6 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
 
   const getMostActivePet = () => {
     if (pets.length === 0) return null;
