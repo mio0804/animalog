@@ -11,9 +11,3 @@ def get_me():
         return jsonify({'error': 'Not authenticated'}), 401
     
     return jsonify({'user': user.to_dict()})
-
-# ログインエンドポイントは削除（フロントエンドで直接Cognitoと通信）
-
-# コールバックエンドポイントは削除（フロントエンドでAmplifyが処理）
-
-# ログアウトエンドポイントは削除（フロントエンドでAmplifyが処理）

@@ -1,0 +1,56 @@
+# 本番環境用フロントエンドDockerfile
+
+# ============= ビルドステージ =============
+FROM node:20-alpine AS builder
+
+# 作業ディレクトリの設定
+WORKDIR /app
+
+# package.jsonとpackage-lock.jsonをコピー
+COPY frontend/package*.json ./
+
+# 依存関係のインストール（CI用のクリーンインストール）
+RUN npm ci --only=production
+
+# 開発用依存関係もインストール（ビルドに必要）
+COPY frontend/package*.json ./
+RUN npm ci
+
+# アプリケーションコードをコピー
+COPY frontend/ .
+
+# 本番用ビルド
+RUN npm run build
+
+# ============= 配信ステージ =============
+FROM nginx:alpine
+
+# nginxユーザーのUID/GIDを設定（セキュリティのため）
+RUN addgroup -g 1000 -S appgroup && \
+    adduser -u 1000 -S appuser -G appgroup
+
+# ビルドステージから成果物をコピー
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# nginx設定ファイルをコピー
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# 権限の設定
+RUN chown -R appuser:appgroup /usr/share/nginx/html && \
+    chown -R appuser:appgroup /var/cache/nginx && \
+    chown -R appuser:appgroup /var/log/nginx && \
+    touch /var/run/nginx.pid && \
+    chown -R appuser:appgroup /var/run/nginx.pid
+
+# ポート80を公開
+EXPOSE 80
+
+# ヘルスチェック
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
+
+# nginxユーザーで実行
+USER appuser
+
+# nginxをフォアグラウンドで起動
+CMD ["nginx", "-g", "daemon off;"]

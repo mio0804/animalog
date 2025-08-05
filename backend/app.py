@@ -46,8 +46,13 @@ def create_app():
     
     return app
 
+# Gunicorn用のアプリケーションインスタンス
+app = create_app()
+
 if __name__ == '__main__':
     app = create_app()
     import os
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # デバッグモードは環境変数から取得
+    debug = os.environ.get('FLASK_ENV', 'development') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug)

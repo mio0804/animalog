@@ -121,8 +121,7 @@ class Config:
     MOCK_USER_NAME = os.getenv('MOCK_USER_NAME', 'テスト')
     
     # CORS
-    CORS_ORIGINS = [
-        'http://localhost:3000', 
-        'http://localhost:5000',
-        'https://refactored-guide-975pv96xg954cx666-3000.app.github.dev'
-    ]
+    # 環境変数から取得（カンマ区切り）、デフォルトは開発環境用
+    cors_origins_str = os.getenv('CORS_ORIGINS', 
+        'http://localhost:3000,http://localhost:5000,https://refactored-guide-975pv96xg954cx666-3000.app.github.dev')
+    CORS_ORIGINS = [origin.strip() for origin in cors_origins_str.split(',') if origin.strip()]

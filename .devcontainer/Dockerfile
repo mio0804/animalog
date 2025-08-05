@@ -26,7 +26,7 @@ RUN npm install -g @anthropic-ai/claude-code
 
 # AWS CLI v2をインストール（本番環境でのECS Exec、S3操作に必須）
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-    && unzip awscliv2.zip \
+    && unzip -o awscliv2.zip \
     && ./aws/install \
     && rm -rf awscliv2.zip aws
 
