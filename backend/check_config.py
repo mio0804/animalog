@@ -30,7 +30,6 @@ def main():
     # 基本設定
     print(f"FLASK_APP: {os.getenv('FLASK_APP')}")
     print(f"FLASK_ENV: {os.getenv('FLASK_ENV')}")
-    print(f"SECRET_KEY: {'設定済み' if os.getenv('SECRET_KEY') else '未設定'}")
     print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
     
     # 認証設定

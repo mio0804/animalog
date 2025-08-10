@@ -45,7 +45,7 @@ def get_database_url():
 
 def validate_config():
     """重要な環境変数が設定されているかチェック"""
-    required_vars = ['FLASK_APP', 'SECRET_KEY']
+    required_vars = ['FLASK_APP']
     missing_vars = []
     
     for var in required_vars:
@@ -87,7 +87,6 @@ def validate_config():
 
 class Config:
     # Flask設定
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
     DEBUG = os.getenv('FLASK_ENV', 'development') == 'development'
     
     # データベース設定
