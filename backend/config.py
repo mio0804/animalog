@@ -12,7 +12,7 @@ def get_database_url():
     if use_rds:
         # 本番環境: RDS + Secrets Manager
         try:
-            from backend.utils.secrets_manager import get_rds_password
+            from utils.secrets_manager import get_rds_password
             
             # 必要な環境変数を取得
             secret_name = os.getenv('AWS_SECRETS_MANAGER_SECRET_NAME')
