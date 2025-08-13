@@ -32,16 +32,21 @@ def get_current_user():
     if not user_info:
         return None
     
-    # ユーザーを検索または作成
-    user = User.query.filter_by(cognito_sub=user_info['sub']).first()
-    if not user:
-        user = User(
-            cognito_sub=user_info['sub'],
-            email=user_info.get('email', ''),
-            username=user_info.get('name', user_info.get('email', '').split('@')[0])
-        )
-        db.session.add(user)
-        db.session.commit()
+    # ユーザーを検索または作成（エラーハンドリング追加）
+    try:
+        user = User.query.filter_by(cognito_sub=user_info['sub']).first()
+        if not user:
+            user = User(
+                cognito_sub=user_info['sub'],
+                email=user_info.get('email', ''),
+                username=user_info.get('name', user_info.get('email', '').split('@')[0])
+            )
+            db.session.add(user)
+            db.session.commit()
+    except Exception as e:
+        current_app.logger.error(f"Database error in get_current_user: {str(e)}")
+        db.session.rollback()
+        return None
     
     return user
 
@@ -58,29 +63,24 @@ def login_required(f):
 
 def verify_cognito_token(token):
     """Cognito JWTトークンを検証"""
+    from utils.cognito_cache import get_jwks_keys, find_key_by_kid
     
     try:
-        # Cognito公開鍵を取得
         region = current_app.config['COGNITO_REGION']
         user_pool_id = current_app.config['COGNITO_USER_POOL_ID']
-        keys_url = f'https://cognito-idp.{region}.amazonaws.com/{user_pool_id}/.well-known/jwks.json'
         
-        response = requests.get(keys_url)
-        if response.status_code != 200:
-            current_app.logger.error(f"JWKS取得失敗: {response.status_code}")
-            return None
-        
-        keys = response.json()['keys']
+        # キャッシュされたJWKSキーを取得
+        keys = get_jwks_keys(region, user_pool_id)
         
         # トークンヘッダをデコードしてkidを取得
         headers = jwt.get_unverified_headers(token)
         kid = headers['kid']
         
-        
         # 正しいキーを検索
-        key = next((k for k in keys if k['kid'] == kid), None)
-        if not key:
-            current_app.logger.error(f"JWT key not found for kid: {kid}")
+        try:
+            key = find_key_by_kid(keys, kid)
+        except Exception as e:
+            current_app.logger.error(str(e))
             return None
         
         # トークンを検証してデコード
