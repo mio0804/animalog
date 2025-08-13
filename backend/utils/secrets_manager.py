@@ -5,8 +5,10 @@ RDSパスワードなどのシークレット情報を取得する
 import json
 import boto3
 from botocore.exceptions import ClientError
+from utils.cache import cached_function
 
 
+@cached_function('secrets_manager', ttl_seconds=600)  # 10分キャッシュ
 def get_secret(secret_name, region_name='ap-northeast-1'):
     """
     AWS Secrets Managerからシークレットを取得
@@ -71,6 +73,7 @@ def get_rds_password(secret_name, region_name='ap-northeast-1'):
     """
     try:
         secret = get_secret(secret_name, region_name)
+        
         # RDS自動生成シークレットの場合
         if 'password' in secret:
             return secret['password']

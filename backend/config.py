@@ -29,8 +29,8 @@ def get_database_url():
             # Secrets Managerからパスワードを取得
             password = get_rds_password(secret_name, aws_region)
             
-            # DATABASE_URLを構築
-            return f"postgresql://{rds_username}:{password}@{rds_endpoint}:5432/{rds_database}"
+            # DATABASE_URLを構築（SSL設定を追加）
+            return f"postgresql://{rds_username}:{password}@{rds_endpoint}:5432/{rds_database}?sslmode=require"
             
         except Exception as e:
             print(f"Error retrieving RDS password: {str(e)}")
@@ -92,6 +92,16 @@ class Config:
     # データベース設定
     SQLALCHEMY_DATABASE_URI = get_database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = os.getenv('SQLALCHEMY_ECHO', 'false').lower() == 'true'
+    
+    # データベース接続プール設定
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,  # 接続の事前チェック
+        'pool_recycle': 3600,   # 1時間で接続を再作成
+        'pool_timeout': 30,     # 接続取得のタイムアウト
+        'max_overflow': 10,     # 最大オーバーフロー接続数
+        'pool_size': 5          # 基本接続プールサイズ
+    }
     
     # AWS S3
     USE_S3 = os.getenv('USE_S3', 'false').lower() == 'true'

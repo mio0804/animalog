@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, current_app
 from flask_cors import CORS
 from config import Config, validate_config
 from models import db
@@ -6,6 +6,7 @@ from routes.auth import auth_bp
 from routes.pets import pets_bp
 from routes.diaries import diaries_bp
 import os
+import logging
 
 def create_app():
     # 環境変数のバリデーション
@@ -14,9 +15,22 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
+    # ログ設定
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
     # 拡張機能を初期化
     db.init_app(app)
     CORS(app, origins=app.config['CORS_ORIGINS'], supports_credentials=True)
+    
+    # データベース接続テスト
+    try:
+        with app.app_context():
+            result = db.session.execute(db.text('SELECT 1'))
+            logger.info("Database connection successful")
+    except Exception as e:
+        logger.error(f"Database connection failed: {str(e)}")
+    
     
     # ブループリントを登録
     app.register_blueprint(auth_bp)
