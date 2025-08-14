@@ -123,7 +123,10 @@ ECS(Fargate)によるコンテナオーケストレーション、RDSによる�
 
 <br>
 
+<div align="center">
+
 ## 構築・デプロイ手順
+</div>
 
 ### 1. 開発環境構築
 - Devcontainerで環境設定
