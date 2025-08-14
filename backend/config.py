@@ -33,7 +33,7 @@ def get_database_url():
             return f"postgresql://{rds_username}:{password}@{rds_endpoint}:5432/{rds_database}?sslmode=require"
             
         except Exception as e:
-            print(f"Error retrieving RDS password: {str(e)}")
+            print(f"RDSパスワードの取得エラー: {str(e)}")
             # フォールバック: 環境変数から直接取得
             fallback_url = os.getenv('DATABASE_URL')
             if fallback_url:
@@ -65,25 +65,25 @@ def validate_config():
             missing_vars.append('DATABASE_URL')
     
     if missing_vars:
-        raise ValueError(f"Required environment variables are missing: {', '.join(missing_vars)}")
+        raise ValueError(f"必要な環境変数が不足しています: {', '.join(missing_vars)}")
     
     # USE_COGNITOがtrueの場合、Cognito関連の変数をチェック
     if os.getenv('USE_COGNITO', 'false').lower() == 'true':
         cognito_vars = ['COGNITO_USER_POOL_ID', 'COGNITO_APP_CLIENT_ID', 'COGNITO_DOMAIN']
         missing_cognito = [var for var in cognito_vars if not os.getenv(var)]
         if missing_cognito:
-            raise ValueError(f"Cognito mode requires these variables: {', '.join(missing_cognito)}")
+            raise ValueError(f"Cognitoモードではこれらの変数が必要です: {', '.join(missing_cognito)}")
     
     # USE_S3がtrueの場合、S3関連の変数をチェック
     if os.getenv('USE_S3', 'false').lower() == 'true':
         s3_vars = ['AWS_REGION', 'S3_BUCKET_NAME']
         missing_s3 = [var for var in s3_vars if not os.getenv(var)]
         if missing_s3:
-            raise ValueError(f"S3 mode requires these variables: {', '.join(missing_s3)}")
+            raise ValueError(f"S3モードではこれらの変数が必要です: {', '.join(missing_s3)}")
         
         # AWS認証情報の確認（IAMロール使用時は不要）
         if not os.getenv('AWS_ACCESS_KEY_ID') and not os.getenv('AWS_SECRET_ACCESS_KEY'):
-            print("Warning: AWS credentials not set. Make sure IAM role is configured for S3 access.")
+            print("警告: AWS認証情報が設定されていません。S3アクセス用のIAMロールが設定されていることを確認してください。")
 
 class Config:
     # Flask設定

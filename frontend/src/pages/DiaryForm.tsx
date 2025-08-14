@@ -49,7 +49,7 @@ const DiaryForm: React.FC = () => {
       }
     } catch (err) {
       setError('日記の取得に失敗しました');
-      console.error('Failed to fetch diary:', err);
+      console.error('日記の取得に失敗しました:', err);
     } finally {
       setIsInitialLoading(false);
     }
@@ -102,7 +102,7 @@ const DiaryForm: React.FC = () => {
           // 3. アップロード成功後のURLを使用
           imageUrl = presignedResponse.file_url;
         } catch (uploadError) {
-          console.error('Image upload failed:', uploadError);
+          console.error('画像のアップロードに失敗しました:', uploadError);
           throw new Error('画像のアップロードに失敗しました');
         }
       }

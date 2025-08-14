@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // 現在のユーザーを取得
       await checkAuth();
     } catch (error) {
-      console.error('Failed to initialize auth:', error);
+      console.error('認証の初期化に失敗しました:', error);
       setIsInitialized(true);
       // 初期化に失敗してもcheckAuthを実行して、最終的にisLoadingをfalseにする
       await checkAuth();
@@ -71,14 +71,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         } catch (error) {
           // バックエンドが利用できない場合はCognitoの情報を使用
-          logger.log('Using Cognito user info:', currentUser);
+          logger.log('Cognitoユーザー情報を使用:', currentUser);
           setUser(currentUser);
         }
       } else {
         setUser(null);
       }
     } catch (error) {
-      logger.error('Auth check failed:', error);
+      logger.error('認証確認に失敗しました:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await authService.signIn();
     } catch (error) {
-      logger.error('Login failed:', error);
+      logger.error('ログインに失敗しました:', error);
       throw error;
     }
   };
@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       // Cognito環境ではリダイレクト後にページがリロードされるため、isLoggingOutは自動的にリセットされる
     } catch (error) {
-      logger.error('Logout failed:', error);
+      logger.error('ログアウトに失敗しました:', error);
       // エラーが発生してもローカルの状態はクリア
       localStorage.removeItem('token');
       setUser(null);

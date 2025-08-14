@@ -55,7 +55,8 @@ def generate_presigned_url(filename, file_type, user_id=None):
             'Key': key,
             'ContentType': file_type
         },
-        ExpiresIn=3600  # 1 hour
+        # 1時間
+        ExpiresIn=3600
     )
     
     # プリサインドURLと最終ファイルURLの両方を返す
@@ -82,17 +83,17 @@ def delete_file(file_url, user_id=None):
         if file_url.startswith(expected_prefix):
             key = file_url[len(expected_prefix):]
             
-            current_app.logger.info(f"Attempting to delete S3 object: Bucket={bucket_name}, Key={key}")
+            current_app.logger.info(f"S3オブジェクトの削除を試行中: Bucket={bucket_name}, Key={key}")
             
             s3_client = create_s3_client_for_flask(current_app)
             
             try:
                 s3_client.delete_object(Bucket=bucket_name, Key=key)
-                current_app.logger.info(f"Successfully deleted S3 object: {key}")
+                current_app.logger.info(f"S3オブジェクトを正常に削除しました: {key}")
             except Exception as e:
-                current_app.logger.error(f"Failed to delete S3 object: Bucket={bucket_name}, Key={key}, Error={e}")
+                current_app.logger.error(f"S3オブジェクトの削除に失敗しました: Bucket={bucket_name}, Key={key}, Error={e}")
         else:
-            current_app.logger.error(f"Invalid S3 URL format: {file_url}")
+            current_app.logger.error(f"不正なS3 URLフォーマット: {file_url}")
     else:
         # ローカルファイルを削除
         if file_url.startswith('/uploads/'):
@@ -102,4 +103,4 @@ def delete_file(file_url, user_id=None):
                 try:
                     os.remove(filepath)
                 except Exception as e:
-                    current_app.logger.error(f"Failed to delete local file: {e}")
+                    current_app.logger.error(f"ローカルファイルの削除に失敗しました: {e}")
