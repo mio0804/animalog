@@ -70,3 +70,5 @@ if __name__ == '__main__':
     # デバッグモードは環境変数から取得
     debug = os.environ.get('FLASK_ENV', 'development') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug)
+
+# ECR への自動プッシュを試行
