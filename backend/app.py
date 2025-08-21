@@ -52,7 +52,7 @@ def create_app():
     # ヘルスチェックエンドポイント
     @app.route('/api/health')
     def health_check():
-        return {'status': 'healthy'}
+        return {'status': 'very healthy'}
     
     # テーブルが存在しない場合は作成
     with app.app_context():
